@@ -1,0 +1,6 @@
+*.log
+*.dmg
+*.asar
+asar-unpacked/
+node_modules/
+.DS_Store
