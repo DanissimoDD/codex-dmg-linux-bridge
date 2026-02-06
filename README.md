@@ -59,12 +59,6 @@ Then run:
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" ~/.local/bin/codex-dmg-linux
 ```
 
-## Safety and legal
-
-- Do not upload app binaries, DMGs, or extracted proprietary payload files.
-- Share scripts/docs only.
-- Ask users to provide their own legally obtained `Codex.dmg`.
-
 ## License
 
 MIT (see `LICENSE`).
