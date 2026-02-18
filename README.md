@@ -4,6 +4,25 @@ Run a Codex macOS DMG payload on Ubuntu/Linux by wiring a Linux launcher around 
 
 This project ships scripts and docs only. It does **not** redistribute proprietary app binaries.
 
+## Current status
+
+Tested on Ubuntu/Linux with:
+
+- Electron payload from extracted `Codex.dmg`
+- launcher: `scripts/codex-dmg-linux-launcher.sh`
+- Codex CLI: `/home/linuxbrew/.linuxbrew/bin/codex`
+
+Working:
+
+- app launches
+- local app-server starts
+- sending messages works
+
+Known non-blocking issues:
+
+- some `git` warnings if current directory is not a Git repo
+- MCP providers may fail if auth/token is missing
+
 ## Why this exists
 
 Some users have `Codex.dmg` and want to run it on Linux. The DMG itself is macOS-focused, so this guide provides a practical Linux bridge:
@@ -58,6 +77,21 @@ Then run:
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" ~/.local/bin/codex-dmg-linux
 ```
+
+## Verify
+
+After launch, validate backend quickly:
+
+```bash
+codex debug app-server send-message-v2 "reply with one word: ok"
+```
+
+Expected final response contains: `ok`.
+
+## Docs
+
+- setup flow: `docs/SETUP.md`
+- common errors/fixes: `docs/TROUBLESHOOTING.md`
 
 ## License
 
