@@ -1,41 +1,40 @@
 # codex-dmg-linux-bridge
 
-دليل عملي لتشغيل payload تطبيق Codex (الموجود داخل `Codex.dmg`) على Linux/Ubuntu.
+A practical guide to run the Codex desktop payload (from `Codex.dmg`) on Linux/Ubuntu.
 
-المشروع ده **لا يوزع** ملفات Codex الأصلية، هو فقط يوفر launcher وخطوات تشغيل.
+This repository ships scripts and documentation only. It does **not** redistribute proprietary Codex binaries.
 
-## 1) هذا المشروع بيعمل إيه؟
+## 1) What this project does
 
-`Codex.dmg` مخصص أساسًا لـ macOS.  
-الفكرة هنا:
+`Codex.dmg` is built for macOS. This project provides a Linux bridge that helps you:
 
-- نستخرج المحتوى المطلوب من `Codex.dmg`
-- نشغل Electron payload على Linux
-- نربطه مع `codex` CLI الصحيح
+- extract the required content from `Codex.dmg`
+- run the Electron payload on Linux
+- wire it to the correct `codex` CLI binary
 
-## 2) قبل ما تبدأ (مهم جدًا)
+## 2) Before you start
 
-- لازم يكون عندك `Codex.dmg` من المصدر الرسمي.
-- الريبو ده لا يحتوي DMG أو binaries أصلية.
-- لو أي خطوة مش مطابقة عندك، راجع `docs/TROUBLESHOOTING.md`.
+- You must have your own `Codex.dmg` from the official source.
+- This repo does not include DMG/app binaries.
+- If anything does not match your machine, check `docs/TROUBLESHOOTING.md`.
 
-## 3) المتطلبات
+## 3) Requirements
 
 - Ubuntu/Linux x64
 - `bash`
 - `git`
 - `node` + `npm` + `npx`
-- `7z` (لفك DMG)
+- `7z` (to extract DMG contents)
 - `codex` CLI
 
-تثبيت المتطلبات (Ubuntu):
+Install dependencies on Ubuntu:
 
 ```bash
 sudo apt update
 sudo apt install -y p7zip-full git curl
 ```
 
-تأكد:
+Verify your environment:
 
 ```bash
 node -v
@@ -44,7 +43,7 @@ npx -v
 codex --version
 ```
 
-## 4) نزّل المشروع
+## 4) Clone this repository
 
 ```bash
 git clone https://github.com/Mina-Sayed/codex-dmg-linux-bridge.git
@@ -52,76 +51,77 @@ cd codex-dmg-linux-bridge
 chmod +x scripts/codex-dmg-linux-launcher.sh
 ```
 
-## 5) جيب `Codex.dmg`
+## 5) Get `Codex.dmg`
 
-نزّله من المصدر الرسمي لحسابك، وبعدها انقله لينكس (لو حملته من جهاز Mac).  
-ضع الملف هنا كمثال:
+Download `Codex.dmg` from your official account source, then place it on Linux.
+
+Example:
 
 ```bash
 mkdir -p "$HOME/codex-dmg-attempt-latest"
 cp /path/to/Codex.dmg "$HOME/codex-dmg-attempt-latest/Codex.dmg"
 ```
 
-## 6) جهّز payload المطلوب من DMG
+## 6) Prepare the runtime payload from DMG
 
-الـlauncher يحتاج مجلد عمل فيه:
+The launcher expects a workdir containing:
 
 - `asar-unpacked/`
 - `tools/node/runtime/bin/npx`
 
-### 6.1 استخراج DMG
+### 6.1 Extract DMG
 
 ```bash
 cd "$HOME/codex-dmg-attempt-latest"
 7z x Codex.dmg -oextract
 ```
 
-### 6.2 استخراج `app.asar` إلى `asar-unpacked`
+### 6.2 Extract `app.asar` into `asar-unpacked`
 
-ابحث عن `app.asar`:
+Find `app.asar`:
 
 ```bash
 APP_ASAR="$(find extract -type f -name app.asar | head -n 1)"
 echo "$APP_ASAR"
 ```
 
-لو ظهر مسار صحيح، استخرجه:
+If the path is valid, extract it:
 
 ```bash
 npx --yes @electron/asar extract "$APP_ASAR" asar-unpacked
 ```
 
-### 6.3 جهّز مسار `tools/node/runtime/bin/npx`
+### 6.3 Ensure `tools/node/runtime/bin/npx` exists
 
-لو غير موجود، اعمل symlink على `npx` النظام:
+If missing, symlink to your system `npx`:
 
 ```bash
 mkdir -p tools/node/runtime/bin
 ln -sf "$(command -v npx)" tools/node/runtime/bin/npx
 ```
 
-## 7) اختَر Codex CLI الصحيح
+## 7) Pick the correct Codex CLI binary
 
-لازم تعرف أي `codex` سيُستخدم:
+Check all installed Codex binaries:
 
 ```bash
 which -a codex
 codex --version
 ```
 
-لو عندك أكثر من واحد، استخدم المسار الأحدث (مثال):
+If you have multiple binaries, use the newest one (example):
 
 `/home/linuxbrew/.linuxbrew/bin/codex`
 
-## 8) سجّل دخول Codex CLI
+## 8) Authenticate Codex CLI
 
 ```bash
 codex login
 ```
 
-## 9) شغّل التطبيق لأول مرة
+## 9) First launch
 
-من داخل الريبو:
+From this repo directory:
 
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
@@ -129,17 +129,17 @@ CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
 ./scripts/codex-dmg-linux-launcher.sh
 ```
 
-## 10) اختبر إن الدنيا شغالة
+## 10) Validate that it works
 
-اختبار سريع للـ app-server:
+Quick app-server validation:
 
 ```bash
 codex debug app-server send-message-v2 "reply with one word: ok"
 ```
 
-المفروض تشوف رد نهائي: `ok`.
+Expected final response contains: `ok`.
 
-## 11) (اختياري) خليه أمر ثابت من أي مكان
+## 11) Optional: install a global launcher command
 
 ```bash
 mkdir -p ~/.local/bin
@@ -147,7 +147,7 @@ cp scripts/codex-dmg-linux-launcher.sh ~/.local/bin/codex-dmg-linux
 chmod +x ~/.local/bin/codex-dmg-linux
 ```
 
-ثم التشغيل:
+Run it from anywhere:
 
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
@@ -155,24 +155,24 @@ CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
 ~/.local/bin/codex-dmg-linux
 ```
 
-## 12) مشاكل متوقعة بسرعة
+## 12) Common errors (quick map)
 
 - `Missing app payload at .../asar-unpacked`
-  - لم يتم استخراج `app.asar` بشكل صحيح.
+  - `app.asar` was not extracted correctly.
 - `Missing Node runtime at .../tools/node/runtime/bin`
-  - اعمل خطوة symlink لـ `npx`.
+  - Create the `npx` symlink step in section 6.3.
 - `Unable to locate the Codex CLI binary`
-  - اضبط `CODEX_CLI_PATH` لمسار `codex` الصحيح.
+  - Set `CODEX_CLI_PATH` to a valid `codex` binary.
 - `model_not_found`
-  - غالبًا CLI قديم أو إعداد موديل غير مناسب للحساب.
+  - Usually wrong/old CLI binary or incompatible model configuration.
 
-تفاصيل أكثر: `docs/TROUBLESHOOTING.md`.
+More details: `docs/TROUBLESHOOTING.md`.
 
-## 13) الملفات المهمة في الريبو
+## 13) Important files in this repo
 
-- `scripts/codex-dmg-linux-launcher.sh`: سكربت التشغيل الأساسي
-- `docs/SETUP.md`: ملاحظات setup
-- `docs/TROUBLESHOOTING.md`: حلول المشاكل
+- `scripts/codex-dmg-linux-launcher.sh`: main Linux launcher
+- `docs/SETUP.md`: additional setup notes
+- `docs/TROUBLESHOOTING.md`: fixes for common issues
 
 ## License
 
