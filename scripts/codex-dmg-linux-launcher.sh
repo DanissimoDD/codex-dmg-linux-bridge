@@ -7,12 +7,10 @@ if command -v readlink >/dev/null 2>&1; then
 else
   WORKDIR="$RAW_WORKDIR"
 fi
-
 APP_DIR="$WORKDIR/asar-unpacked"
 NODE_BIN="$WORKDIR/tools/node/runtime/bin"
-
-# Prefer explicit override, otherwise use Homebrew Codex CLI path.
 DEFAULT_CODEX_BIN="/home/linuxbrew/.linuxbrew/bin/codex"
+
 if [[ -n "${CODEX_CLI_PATH:-}" ]]; then
   CODEX_BIN="$CODEX_CLI_PATH"
 else
