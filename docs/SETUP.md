@@ -1,4 +1,4 @@
-# Setup Notes (Ubuntu)
+# Setup Notes (Ubuntu + macOS Intel Addendum)
 
 This is the exact practical flow used for a successful run.
 
@@ -20,9 +20,13 @@ which -a codex
 codex --version
 ```
 
-Recommended path on this setup:
+Recommended path on Ubuntu/Linux:
 
 - `/home/linuxbrew/.linuxbrew/bin/codex`
+
+Recommended path on macOS Intel:
+
+- `/usr/local/bin/codex`
 
 ## 3) Configure model
 
@@ -36,9 +40,19 @@ If you previously mapped this model down to older ones, remove that specific mig
 
 ## 4) Launch
 
+Ubuntu/Linux example:
+
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
 CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
+~/.local/bin/codex-dmg-linux
+```
+
+macOS Intel example:
+
+```bash
+CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
+CODEX_CLI_PATH="/usr/local/bin/codex" \
 ~/.local/bin/codex-dmg-linux
 ```
 

@@ -1,16 +1,18 @@
 # codex-dmg-linux-bridge
 
-A practical guide to run the Codex desktop payload (from `Codex.dmg`) on Linux/Ubuntu.
+A practical guide to run the Codex desktop payload (from `Codex.dmg`) via a Linux bridge workflow, with an additional macOS Intel (`x86_64`) path.
 
 This repository ships scripts and documentation only. It does **not** redistribute proprietary Codex binaries.
 
 ## 1) What this project does
 
-`Codex.dmg` is built for macOS. This project provides a Linux bridge that helps you:
+`Codex.dmg` is built for macOS. This project provides a bridge workflow that helps you:
 
 - extract the required content from `Codex.dmg`
-- run the Electron payload on Linux
+- run the Electron payload (Linux-first flow)
 - wire it to the correct `codex` CLI binary
+
+Additional notes for macOS Intel are included in each relevant section.
 
 ## 2) Before you start
 
@@ -20,7 +22,11 @@ This repository ships scripts and documentation only. It does **not** redistribu
 
 ## 3) Requirements
 
+Primary:
 - Ubuntu/Linux x64
+
+Additional supported path:
+- macOS Intel (`x86_64`)
 - `bash`
 - `git`
 - `node` + `npm` + `npx`
@@ -32,6 +38,12 @@ Install dependencies on Ubuntu:
 ```bash
 sudo apt update
 sudo apt install -y p7zip-full git curl
+```
+
+Install dependencies on macOS Intel (Homebrew):
+
+```bash
+brew install p7zip git curl
 ```
 
 Verify your environment:
@@ -53,7 +65,7 @@ chmod +x scripts/codex-dmg-linux-launcher.sh
 
 ## 5) Get `Codex.dmg`
 
-Download `Codex.dmg` from your official account source, then place it on Linux.
+Download `Codex.dmg` from your official account source, then place it on your target machine.
 
 Example:
 
@@ -71,9 +83,18 @@ The launcher expects a workdir containing:
 
 ### 6.1 Extract DMG
 
+Linux flow:
+
 ```bash
 cd "$HOME/codex-dmg-attempt-latest"
 7z x Codex.dmg -oextract
+```
+
+macOS Intel flow (preferred on macOS):
+
+```bash
+cd "$HOME/codex-dmg-attempt-latest"
+hdiutil attach Codex.dmg -nobrowse -readonly
 ```
 
 ### 6.2 Extract `app.asar` into `asar-unpacked`
@@ -81,7 +102,7 @@ cd "$HOME/codex-dmg-attempt-latest"
 Find `app.asar`:
 
 ```bash
-APP_ASAR="$(find extract -type f -name app.asar | head -n 1)"
+APP_ASAR="$(find extract /Volumes -type f -name app.asar 2>/dev/null | head -n 1)"
 echo "$APP_ASAR"
 ```
 
@@ -111,7 +132,8 @@ codex --version
 
 If you have multiple binaries, use the newest one (example):
 
-`/home/linuxbrew/.linuxbrew/bin/codex`
+- Linux: `/home/linuxbrew/.linuxbrew/bin/codex`
+- macOS Intel: `/usr/local/bin/codex`
 
 ## 8) Authenticate Codex CLI
 
@@ -123,9 +145,19 @@ codex login
 
 From this repo directory:
 
+Linux example:
+
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
 CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
+./scripts/codex-dmg-linux-launcher.sh
+```
+
+macOS Intel example:
+
+```bash
+CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
+CODEX_CLI_PATH="/usr/local/bin/codex" \
 ./scripts/codex-dmg-linux-launcher.sh
 ```
 
@@ -149,9 +181,19 @@ chmod +x ~/.local/bin/codex-dmg-linux
 
 Run it from anywhere:
 
+Linux example:
+
 ```bash
 CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
 CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
+~/.local/bin/codex-dmg-linux
+```
+
+macOS Intel example:
+
+```bash
+CODEX_DMG_WORKDIR="$HOME/codex-dmg-attempt-latest" \
+CODEX_CLI_PATH="/usr/local/bin/codex" \
 ~/.local/bin/codex-dmg-linux
 ```
 
@@ -168,9 +210,16 @@ CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex" \
 
 More details: `docs/TROUBLESHOOTING.md`.
 
+If you mounted the DMG with `hdiutil`, optionally detach after extraction:
+
+```bash
+MOUNT_POINT="$(hdiutil info | awk '/Codex Installer/{print $1}' | head -n 1)"
+[[ -n "$MOUNT_POINT" ]] && hdiutil detach "$MOUNT_POINT"
+```
+
 ## 13) Important files in this repo
 
-- `scripts/codex-dmg-linux-launcher.sh`: main Linux launcher
+- `scripts/codex-dmg-linux-launcher.sh`: main bridge launcher
 - `docs/SETUP.md`: additional setup notes
 - `docs/TROUBLESHOOTING.md`: fixes for common issues
 

@@ -18,8 +18,16 @@ codex --version
 
 2. Force launcher to modern CLI:
 
+Linux path example:
+
 ```bash
 CODEX_CLI_PATH="/home/linuxbrew/.linuxbrew/bin/codex"
+```
+
+macOS Intel path example:
+
+```bash
+CODEX_CLI_PATH="/usr/local/bin/codex"
 ```
 
 3. Check available models via app-server `model/list`.
@@ -36,9 +44,21 @@ Fix:
 - restart app fully
 - create a new conversation
 
+## Native module architecture mismatch (`ERR_DLOPEN_FAILED`)
+
+Cause:
+
+- payload contains ARM64 `.node` native module from DMG
+- Electron runtime is x86_64 on macOS Intel
+
+Fix:
+
+- rebuild the failing native module for `electron@40` + `x64`
+- replace only the affected `.node` binary in `asar-unpacked`
+
 ## DBus warning: UnitExists
 
-`org.freedesktop.systemd1.UnitExists` is typically a warning and not the root cause of message failures.
+`org.freedesktop.systemd1.UnitExists` is typically a warning on Linux and not the root cause of message failures.
 
 ## DeprecationWarning: url.parse
 
